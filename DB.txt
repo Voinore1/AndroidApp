@@ -1,0 +1,8 @@
+mail: codabot811@bariswc.com
+pass: codabot811@bariswc.comA
+connection string:postgresql://androidDB_owner:npg_UpqjW8rGM7YI@ep-black-surf-a2mokz7p-pooler.eu-central-1.aws.neon.tech/androidDB?sslmode=require
+
+PGHOST='ep-black-surf-a2mokz7p-pooler.eu-central-1.aws.neon.tech'
+PGDATABASE='androidDB'
+PGUSER='androidDB_owner'
+PGPASSWORD='npg_UpqjW8rGM7YI'
