@@ -7,23 +7,19 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Channels;
+using Data.Entities;
 
 namespace Core.Services
 {
-    public class AuthService : IAuthService
+    public class AuthService(UserManager<User> userManager, 
+                                            JwtOptions jwtOptions) : IAuthService
     {
-        private readonly UserManager<IdentityUser> userManager;
-        private readonly JwtOptions jwtOptions;
-
-        public AuthService(UserManager<IdentityUser> userManager, JwtOptions jwtOptions)
+        public async Task<RegisterResult> RegisterAsync(RegisterModel model, IFileService fileService)
         {
-            this.userManager = userManager;
-            this.jwtOptions = jwtOptions;
-        }
-
-        public async Task<RegisterResult> RegisterAsync(RegisterModel model)
-        {
-            var user = new IdentityUser { UserName = model.Username, Email = model.Email };
+            var user = new User { UserName = model.Username, Email = model.Email };
+            
+            if (model.ProfilePicture != null) { user.ProfilePicturePath = await fileService.SaveImage(model.ProfilePicture); }
+            
             var result = await userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
@@ -44,11 +40,11 @@ namespace Core.Services
             return new LoginResult { Succeeded = false };
         }
 
-        private string GenerateJwtToken(IdentityUser user)
+        private string GenerateJwtToken(User user)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email!)
             };
 

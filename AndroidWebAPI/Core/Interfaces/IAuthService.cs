@@ -9,7 +9,7 @@ namespace Core.Interfaces
 {
     public interface IAuthService
     {
-        Task<RegisterResult> RegisterAsync(RegisterModel model);
+        Task<RegisterResult> RegisterAsync(RegisterModel model, IFileService fileService);
         Task<LoginResult> LoginAsync(LoginModel model);
     }
 }
