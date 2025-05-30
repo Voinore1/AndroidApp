@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using AndroidWebAPI.Services;
 using Data.Entities;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,7 +84,15 @@ var app = builder.Build();
     app.UseSwagger();
     app.UseSwaggerUI();
 //}
-app.UseStaticFiles();
+var imageFolder = builder.Configuration.GetValue<string>("ImageFolder") ?? "";
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, imageFolder)),
+    RequestPath = $"/image"
+});
+
 app.UseHttpsRedirection();
 
 app.UseCors(cfg =>

@@ -37,7 +37,7 @@ public class FileService(IWebHostEnvironment evn) : IFileService
                 using FileStream fs = new FileStream(fullPath, FileMode.Create);
                 await file.CopyToAsync(fs);
 
-                savedFiles.Add(Path.DirectorySeparatorChar + relativePath);
+                savedFiles.Add(Path.DirectorySeparatorChar + name + ext);
             }
 
             return savedFiles;

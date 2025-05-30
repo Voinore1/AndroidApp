@@ -16,11 +16,11 @@ namespace Core.Services
     {
         public async Task<RegisterResult> RegisterAsync(RegisterModel model, IFileService fileService)
         {
-            var user = new User { UserName = model.Username, Email = model.Email };
+            var user = new User { UserName = model.username, Email = model.email };
             
-            if (model.ProfilePicture != null) { user.ProfilePicturePath = await fileService.SaveImage(model.ProfilePicture); }
+            if (model.image != null) { user.ProfilePicturePath = await fileService.SaveImage(model.image); }
             
-            var result = await userManager.CreateAsync(user, model.Password);
+            var result = await userManager.CreateAsync(user, model.password);
             if (result.Succeeded)
             {
                 var token = GenerateJwtToken(user);
@@ -31,8 +31,8 @@ namespace Core.Services
 
         public async Task<LoginResult> LoginAsync(LoginModel model)
         {
-            var user = await userManager.FindByEmailAsync(model.Email);
-            if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
+            var user = await userManager.FindByEmailAsync(model.email);
+            if (user != null && await userManager.CheckPasswordAsync(user, model.password))
             {
                 var token = GenerateJwtToken(user);
                 return new LoginResult { Succeeded = true, Token = token };
@@ -40,12 +40,22 @@ namespace Core.Services
             return new LoginResult { Succeeded = false };
         }
 
+        public async Task<User> GetUserInfoAsync(string userEmail)
+        {
+            var user = await userManager.FindByEmailAsync(userEmail)
+                       ?? throw new Exception($"user by email {userEmail} not found");
+            return user;
+        }
+
         private string GenerateJwtToken(User user)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email!)
+                new("id", user.Id.ToString()),
+                new("email", user.Email!),
+                new("username", user.UserName!),
+                new("image", user.ProfilePicturePath!)
+                
             };
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key));

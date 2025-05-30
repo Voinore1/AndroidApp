@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Data.Entities;
 
 namespace Core.Interfaces
 {
@@ -11,5 +12,6 @@ namespace Core.Interfaces
     {
         Task<RegisterResult> RegisterAsync(RegisterModel model, IFileService fileService);
         Task<LoginResult> LoginAsync(LoginModel model);
+        Task<User> GetUserInfoAsync(string userEmail);
     }
 }
