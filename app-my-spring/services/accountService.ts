@@ -1,6 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 import { createBaseQuery } from '@/utils/createBaseQuery'
-import { ILogin, ILoginResponse, IRegister } from '@/interfaces/account'
+import {ILogin, ILoginResponse, IRegister, IUserInfo} from '@/interfaces/account'
 import {serialize} from "object-to-formdata";
 
 export const accountApi = createApi({
@@ -12,7 +12,7 @@ export const accountApi = createApi({
         login: builder.mutation<ILoginResponse, ILogin>({
             query: (data : ILogin) => {
                 return {
-                    url: 'login',
+                    url: 'Login',
                     method: 'POST',
                     body: data
                 }
@@ -23,13 +23,25 @@ export const accountApi = createApi({
             query: (data : IRegister) => {
                 const formData = serialize(data);
                 return {
-                    url: 'register',
+                    url: 'Register',
                     method: 'POST',
                     body: formData
                 }
             }
-        })
+        }),
+
+        getUserInfo: builder.query<IUserInfo, string | null>({
+            query: (token)=> {
+                return {
+                    url: 'GetUserInfo',
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            },
+        }),
     })
 })
 
-export const { useLoginMutation, useRegisterMutation } = accountApi;
+export const { useLoginMutation, useRegisterMutation, useGetUserInfoQuery } = accountApi;

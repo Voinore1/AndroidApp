@@ -14,7 +14,6 @@ using Data.Entities;
 namespace Core.Services
 {
     public class AuthService(UserManager<User> userManager, 
-                                            JwtOptions jwtOptions,
                                             IMapper mapper) : IAuthService
     {
         public async Task<RegisterResult> RegisterAsync(RegisterModel model, IFileService fileService)
@@ -60,15 +59,16 @@ namespace Core.Services
                 new("image", user.ProfilePicturePath!)
                 
             };
+            
+            var key = Encoding.UTF8.GetBytes("uyfjydr5ee6vru6-ghiraekuyare-reaguhaekuyfgharh");
+            var signingKey = new SymmetricSecurityKey(key);
 
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
+            var signinCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+            
             var token = new JwtSecurityToken(
-                issuer: jwtOptions.Issuer,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(jwtOptions.LifetimeInMinutes),
-                signingCredentials: credentials);
+                expires: DateTime.UtcNow.AddMinutes(10),
+                signingCredentials: signinCredentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }

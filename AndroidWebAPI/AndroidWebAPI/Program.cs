@@ -27,49 +27,51 @@ builder.Services.AddIdentity<User, IdentityRole<int>>()
     .AddDefaultTokenProviders();
 
 
-var jwtOpts = builder.Configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>()!;
-builder.Services.AddSingleton(_ => jwtOpts!);
+var signingKey = new SymmetricSecurityKey(
+    Encoding.UTF8.GetBytes(
+        builder.Configuration["JwtSecretKey"] ?? throw new NullReferenceException("JwtSecretKey")
+    )
+);
 
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(o =>
-    {
-        o.SaveToken = true;
-        o.RequireHttpsMetadata = false;
-        o.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtOpts.Issuer,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOpts.Key)),
-            ClockSkew = TimeSpan.Zero
-        };
-    });
-
-builder.Services.AddSwaggerGen(options =>
+builder.Services.AddAuthentication(opt =>
 {
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(opt =>
+{
+    opt.SaveToken = true;
+    opt.RequireHttpsMetadata = false;
+    opt.TokenValidationParameters = new TokenValidationParameters()
     {
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer"
-    });
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        IssuerSigningKey = signingKey,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ClockSkew = TimeSpan.Zero
+    };
+});
 
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+builder.Services.AddSwaggerGen(opt =>
+{
+    opt.AddSecurityDefinition("Bearer",
+        new OpenApiSecurityScheme
+        {
+            Description = "Jwt Auth header using the Bearer scheme", Type = SecuritySchemeType.Http, Scheme = "bearer"
+        });
+    opt.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
             {
                 Reference = new OpenApiReference
                 {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
+                    Id = "Bearer",
+                    Type = ReferenceType.SecurityScheme
                 }
             },
-            Array.Empty<string>()
+            new List<string>()
         }
     });
 });
@@ -77,6 +79,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

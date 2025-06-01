@@ -26,3 +26,9 @@ export interface IUserState {
     user: IUser | null;
     token: string | null;
 }
+
+export interface IUserInfo{
+    email: string;
+    userName: string;
+    image: string;
+}
