@@ -7,16 +7,19 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Channels;
+using AutoMapper;
+using Core.Mapper;
 using Data.Entities;
 
 namespace Core.Services
 {
     public class AuthService(UserManager<User> userManager, 
-                                            JwtOptions jwtOptions) : IAuthService
+                                            JwtOptions jwtOptions,
+                                            IMapper mapper) : IAuthService
     {
         public async Task<RegisterResult> RegisterAsync(RegisterModel model, IFileService fileService)
         {
-            var user = new User { UserName = model.username, Email = model.email };
+            var user = mapper.Map<User>(model);
             
             if (model.image != null) { user.ProfilePicturePath = await fileService.SaveImage(model.image); }
             
@@ -51,8 +54,8 @@ namespace Core.Services
         {
             var claims = new List<Claim>
             {
-                new("id", user.Id.ToString()),
                 new("email", user.Email!),
+                new("id", user.Id.ToString()),
                 new("username", user.UserName!),
                 new("image", user.ProfilePicturePath!)
                 

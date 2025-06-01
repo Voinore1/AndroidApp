@@ -34,6 +34,8 @@ builder.Services.AddSingleton(_ => jwtOpts!);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o =>
     {
+        o.SaveToken = true;
+        o.RequireHttpsMetadata = false;
         o.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = false,
@@ -76,6 +78,8 @@ builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IFileService, FileService>();
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -102,6 +106,7 @@ app.UseCors(cfg =>
     cfg.AllowAnyOrigin();
 });
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.Use(async (context, next) =>

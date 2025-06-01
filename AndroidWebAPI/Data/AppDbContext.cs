@@ -28,5 +28,7 @@ namespace Data
                 .HasIndex(u => u.Email)
                 .IsUnique();
         }
+
+        public DbSet<Category> Categories { get; set; }
     }
 }

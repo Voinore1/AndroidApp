@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AndroidWebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class AccountController(IAuthService authService, IFileService fileService) : ControllerBase
     {
 
-        [HttpPost("register")]
+        [HttpPost]
         public async Task<IActionResult> Register([FromForm] RegisterModel model)
         {
             var result = await authService.RegisterAsync(model, fileService);
@@ -22,7 +22,7 @@ namespace AndroidWebAPI.Controllers
             return BadRequest(result.Errors);
         }
 
-        [HttpPost("login")]
+        [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             if (!ModelState.IsValid)
@@ -37,7 +37,7 @@ namespace AndroidWebAPI.Controllers
         }
         
         [Authorize]
-        [HttpGet("getUserInfo")]
+        [HttpGet]
         public async Task<IActionResult> GetUserInfo()
         {
             try
